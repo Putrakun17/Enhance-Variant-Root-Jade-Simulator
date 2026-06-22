@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deep-rooted Variant Dragon Jade — Enhancement Simulator</title>
+<style>
+  :root {
+    --bg: #0D1117;
+    --surface: #111820;
+    --surface2: #16202B;
+    --border: #2a3a2a;
+    --jade: #2E7D52;
+    --jade-light: #3FA86E;
+    --jade-glow: #56D68A;
+    --gold: #C9A227;
+    --gold-light: #E8C04A;
+    --brown: #4A2E1A;
+    --cream: #E8DCC8;
+    --muted: #7A8A7A;
+    --red: #C0392B;
+    --red-light: #E74C3C;
+    --blue: #2980B9;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(46,125,82,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(201,162,39,0.06) 0%, transparent 50%);
+  }
+
+  header {
+    text-align: center;
+    padding: 28px 16px 16px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(46,125,82,0.12) 0%, transparent 100%);
+    position: relative;
+  }
+
+  header::before {
+    content: '✦';
+    color: var(--jade);
+    font-size: 12px;
+    display: block;
+    letter-spacing: 12px;
+    opacity: 0.6;
+    margin-bottom: 6px;
+  }
+
+  header h1 {
+    font-size: clamp(16px, 3vw, 24px);
+    font-weight: 800;
+    color: var(--jade-glow);
+    text-shadow: 0 0 24px rgba(86,214,138,0.4);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  header p {
+    color: var(--gold);
+    font-size: 11px;
+    letter-spacing: 3px;
+    margin-top: 4px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .main { grid-template-columns: 1fr; }
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--jade);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+  }
+
+  /* ── ENHANCE LEVEL DISPLAY ── */
+  .level-display {
+    text-align: center;
+    padding: 20px;
+    background: var(--surface2);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(46,125,82,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .level-display::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(46,125,82,0.05), transparent);
+    pointer-events: none;
+  }
+
+  .level-label { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+
+  .level-number {
+    font-size: 64px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--jade-glow);
+    text-shadow: 0 0 32px rgba(86,214,138,0.5);
+    font-variant-numeric: tabular-nums;
+    transition: all 0.2s;
+  }
+
+  .level-number.flash-success {
+    animation: flashSuccess 0.6s ease;
+  }
+
+  .level-number.flash-fail {
+    animation: flashFail 0.6s ease;
+  }
+
+  @keyframes flashSuccess {
+    0% { transform: scale(1); color: var(--jade-glow); }
+    30% { transform: scale(1.15); color: #fff; text-shadow: 0 0 48px #56D68A; }
+    100% { transform: scale(1); color: var(--jade-glow); }
+  }
+
+  @keyframes flashFail {
+    0% { transform: scale(1); color: var(--jade-glow); }
+    30% { transform: scale(0.9); color: var(--red-light); text-shadow: 0 0 32px #E74C3C; }
+    100% { transform: scale(1); color: var(--jade-glow); }
+  }
+
+  .level-arrow {
+    font-size: 18px;
+    color: var(--muted);
+    margin: 0 10px;
+  }
+
+  .level-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .level-target {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gold-light);
+    opacity: 0.7;
+  }
+
+  /* ── CONTROLS ── */
+  .control-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    align-items: flex-end;
+  }
+
+  .control-group {
+    flex: 1;
+  }
+
+  label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  select, input[type="number"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--cream);
+    padding: 10px 12px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  select:focus, input[type="number"]:focus {
+    border-color: var(--jade);
+    box-shadow: 0 0 0 2px rgba(46,125,82,0.2);
+  }
+
+  select option { background: #1a2a1a; }
+
+  /* ── RATE INFO ── */
+  .rate-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(46,125,82,0.15);
+    border: 1px solid rgba(46,125,82,0.4);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--jade-glow);
+    margin-right: 8px;
+  }
+
+  .rate-badge.red {
+    background: rgba(192,57,43,0.15);
+    border-color: rgba(192,57,43,0.4);
+    color: var(--red-light);
+  }
+
+  .rate-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+
+  /* ── ENHANCE BTN ── */
+  .btn-enhance {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--jade) 0%, #1a5c38 100%);
+    border: 1px solid var(--jade-light);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 20px rgba(46,125,82,0.3);
+    margin-bottom: 10px;
+  }
+
+  .btn-enhance:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--jade-light) 0%, var(--jade) 100%);
+    box-shadow: 0 6px 28px rgba(86,214,138,0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-enhance:active:not(:disabled) { transform: translateY(0); }
+  .btn-enhance:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-auto {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #1a3a5c 0%, #0f2235 100%);
+    border: 1px solid #2a4a6a;
+    border-radius: 8px;
+    color: #7EC8E3;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 10px;
+  }
+
+  .btn-auto:hover:not(:disabled) { border-color: #7EC8E3; }
+  .btn-auto:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-reset {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+
+  .btn-reset:hover { border-color: var(--red); color: var(--red-light); }
+
+  /* ── RESULT LOG ── */
+  .result-msg {
+    text-align: center;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+  }
+
+  .result-msg.success {
+    background: rgba(46,125,82,0.2);
+    border: 1px solid rgba(86,214,138,0.4);
+    color: var(--jade-glow);
+  }
+
+  .result-msg.fail {
+    background: rgba(192,57,43,0.15);
+    border: 1px solid rgba(231,76,60,0.4);
+    color: var(--red-light);
+  }
+
+  .result-msg.down {
+    background: rgba(201,162,39,0.1);
+    border: 1px solid rgba(201,162,39,0.4);
+    color: var(--gold-light);
+  }
+
+  .result-msg.idle {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* ── STATS ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+
+  .stat-key {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+
+  .stat-val {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--cream);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-val.jade { color: var(--jade-glow); }
+  .stat-val.gold { color: var(--gold-light); }
+
+  /* ── MATERIALS ── */
+  .mat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .mat-name {
+    font-size: 12px;
+    color: var(--cream);
+    opacity: 0.8;
+  }
+
+  .mat-val {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold-light);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── INVENTORY INPUT ── */
+  .inv-section { margin-top: 8px; }
+
+  .inv-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+
+  .inv-row label {
+    flex: 1;
+    margin-bottom: 0;
+    font-size: 11px;
+    color: var(--cream);
+    opacity: 0.8;
+  }
+
+  .inv-row input {
+    width: 130px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .inv-status {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .inv-status.ok { color: var(--jade-glow); }
+  .inv-status.low { color: var(--red-light); }
+
+  /* ── LOG ── */
+  .log-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    height: 160px;
+    overflow-y: auto;
+    padding: 10px;
+    font-size: 11px;
+    font-family: monospace;
+    color: var(--muted);
+    scroll-behavior: smooth;
+  }
+
+  .log-box::-webkit-scrollbar { width: 4px; }
+  .log-box::-webkit-scrollbar-track { background: transparent; }
+  .log-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .log-entry { margin-bottom: 4px; line-height: 1.5; }
+  .log-entry.s { color: var(--jade-glow); }
+  .log-entry.f { color: var(--red-light); }
+  .log-entry.d { color: var(--gold-light); }
+
+  /* ── AUTO PANEL ── */
+  .auto-panel {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .auto-panel-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .auto-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    margin-bottom: 8px;
+  }
+
+  .auto-row .control-group { flex: 1; }
+
+  .progress-bar-wrap {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--jade), var(--jade-glow));
+    border-radius: 2px;
+    transition: width 0.15s;
+    width: 0%;
+  }
+
+  /* ── TABLE ── */
+  .ref-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+
+  .ref-table th {
+    background: rgba(46,125,82,0.2);
+    color: var(--jade-glow);
+    padding: 7px 6px;
+    text-align: right;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .ref-table th:first-child { text-align: center; }
+
+  .ref-table td {
+    padding: 5px 6px;
+    text-align: right;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    color: var(--cream);
+    font-variant-numeric: tabular-nums;
+    opacity: 0.75;
+  }
+
+  .ref-table td:first-child { text-align: center; color: var(--jade); font-weight: 700; }
+
+  .ref-table tr:hover td { background: rgba(46,125,82,0.06); opacity: 1; }
+
+  .ref-table tr.highlight td {
+    background: rgba(201,162,39,0.1) !important;
+    color: var(--gold-light);
+    opacity: 1;
+  }
+
+  .ref-table tr.highlight td:first-child { color: var(--gold-light); }
+
+  .table-wrap {
+    max-height: 340px;
+    overflow-y: auto;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  .table-wrap::-webkit-scrollbar { width: 4px; }
+  .table-wrap::-webkit-scrollbar-track { background: transparent; }
+  .table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ── SESSION SUMMARY ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .sum-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .sum-box .sum-val {
+    font-size: 22px;
+    font-weight: 900;
+    margin-bottom: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sum-box .sum-key {
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Particles */
+  .particle-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 999;
+    overflow: hidden;
+  }
+
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: floatUp 1.2s ease-out forwards;
+    pointer-events: none;
+  }
+
+  @keyframes floatUp {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-120px) scale(0.3); }
+  }
+
+  .auto-speed-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  .note-box {
+    background: rgba(201,162,39,0.07);
+    border: 1px solid rgba(201,162,39,0.25);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 11px;
+    color: rgba(232,192,74,0.8);
+    line-height: 1.7;
+    margin-top: 8px;
+  }
+
+  .note-box strong { color: var(--gold-light); }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    padding: 8px 16px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .tab.active {
+    color: var(--jade-glow);
+    border-bottom-color: var(--jade-glow);
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+</style>
+</head>
+<body>
+<div class="particle-container" id="particles"></div>
+
+<header>
+  <h1>Deep-rooted Variant Dragon Jade</h1>
+  <p>Legend · Enhancement Simulator</p>
+</header>
+
+<div class="main">
+  <!-- LEFT COLUMN -->
+  <div>
+    <!-- ENHANCE PANEL -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Enhancement</div>
+
+      <div class="level-display">
+        <div class="level-label">Current Enhancement Level</div>
+        <div class="level-number" id="lvlDisplay">+0</div>
+        <div class="level-row">
+          <span style="font-size:12px;color:var(--muted)">Next:</span>
+          <span class="level-target" id="lvlTarget">+1</span>
+        </div>
+      </div>
+
+      <div class="control-row">
+        <div class="control-group">
+          <label>From Level</label>
+          <select id="fromLevel" onchange="updateFromLevel()"></select>
+        </div>
+        <div class="control-group">
+          <label>To Level</label>
+          <select id="toLevel" disabled>
+            <option>Auto</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="rate-info" id="rateInfo">
+        <span class="rate-badge" id="successBadge">✓ 100%</span>
+        <span style="font-size:11px;color:var(--muted)" id="breakNote"></span>
+      </div>
+
+      <div class="result-msg idle" id="resultMsg">⚔ Siap untuk enhance...</div>
+
+      <button class="btn-enhance" id="btnEnhance" onclick="doEnhance()">⚡ Enhance</button>
+
+      <!-- AUTO MODE -->
+      <div class="auto-panel">
+        <div class="auto-panel-title">⚙ Auto Enhance</div>
+        <div class="auto-row">
+          <div class="control-group">
+            <label>Target Level</label>
+            <select id="autoTarget"></select>
+          </div>
+          <div class="control-group">
+            <label>Speed</label>
+            <select id="autoSpeed">
+              <option value="600">Normal</option>
+              <option value="300">Fast</option>
+              <option value="100">Very Fast</option>
+              <option value="50">Instant</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-auto" id="btnAuto" onclick="toggleAuto()">▶ Start Auto</button>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+        <div class="auto-speed-label" id="autoStatusLabel"></div>
+      </div>
+
+      <button class="btn-reset" onclick="resetAll()">↺ Reset Semua</button>
+    </div>
+
+    <!-- MATERIAL COST -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Biaya Per Enhance</div>
+      <div class="mat-row">
+        <span class="mat-name">🪙 Gold</span>
+        <span class="mat-val" id="matGold">50,000</span>
+      </div>
+      <div class="mat-row">
+        <span class="mat-name">🌿 Deep-rooted Fragment of Longing</span>
+        <span class="mat-val" id="matFrag">20</span>
+      </div>
+      <div class="mat-row" style="border-bottom:none">
+        <span class="mat-name">🌱 Twisted Root</span>
+        <span class="mat-val" id="matRoot">4</span>
+      </div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Inventory Material</div>
+      <div class="inv-section">
+        <div class="inv-row">
+          <label>🪙 Gold</label>
+          <input type="number" id="invGold" value="0" min="0" step="100000" oninput="checkInv()">
+        </div>
+        <div class="inv-row">
+          <label>🌿 Fragment</label>
+          <input type="number" id="invFrag" value="0" min="0" oninput="checkInv()">
+        </div>
+        <div class="inv-row">
+          <label>🌱 Twisted Root</label>
+          <input type="number" id="invRoot" value="0" min="0" oninput="checkInv()">
+        </div>
+        <div class="inv-status" id="invStatus">Masukkan jumlah material yang dimiliki</div>
+      </div>
+    </div>
+
+    <!-- SESSION STATS -->
+    <div class="card">
+      <div class="card-title">Statistik Sesi</div>
+      <div class="stat-grid">
+        <div class="stat-item">
+          <div class="stat-key">Total Attempt</div>
+          <div class="stat-val jade" id="statAttempt">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-key">Sukses</div>
+          <div class="stat-val jade" id="statSuccess">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-key">Gagal</div>
+          <div class="stat-val" style="color:var(--red-light)" id="statFail">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-key">Turun Level</div>
+          <div class="stat-val gold" id="statDown">0</div>
+        </div>
+      </div>
+      <div class="summary-grid">
+        <div class="sum-box">
+          <div class="sum-val" style="color:var(--gold-light)" id="sumGold">0</div>
+          <div class="sum-key">Gold Spent</div>
+        </div>
+        <div class="sum-box">
+          <div class="sum-val" style="color:var(--jade-glow)" id="sumFrag">0</div>
+          <div class="sum-key">Fragment</div>
+        </div>
+        <div class="sum-box">
+          <div class="sum-val" style="color:var(--jade-glow)" id="sumRoot">0</div>
+          <div class="sum-key">Twisted Root</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div>
+    <!-- CURRENT STATS -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Stat Saat Ini</div>
+      <div class="stat-grid">
+        <div class="stat-item">
+          <div class="stat-key">ATK</div>
+          <div class="stat-val jade" id="sAtk">2,437,000</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-key">Crit Damage</div>
+          <div class="stat-val" id="sCrit">167,200</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-key">Final Damage</div>
+          <div class="stat-val" id="sFinal">1,300</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-key">Max HP</div>
+          <div class="stat-val" id="sHP">950,000</div>
+        </div>
+        <div class="stat-item" style="grid-column:span 2">
+          <div class="stat-key">Elem%</div>
+          <div class="stat-val gold" id="sElem">5%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOG -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Enhancement Log</div>
+      <div class="log-box" id="logBox">
+        <div class="log-entry">— Simulator siap. Pilih level dan mulai enhance. —</div>
+      </div>
+    </div>
+
+    <!-- REFERENCE TABLE -->
+    <div class="card">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('tbl')">Tabel Referensi</div>
+        <div class="tab" onclick="switchTab('note')">Catatan</div>
+      </div>
+      <div class="tab-content active" id="tab-tbl">
+        <div class="table-wrap">
+          <table class="ref-table" id="refTable">
+            <thead>
+              <tr>
+                <th>Lv</th>
+                <th>Rate</th>
+                <th>Gold</th>
+                <th>Frag</th>
+                <th>Root</th>
+                <th>ATK</th>
+                <th>HP</th>
+              </tr>
+            </thead>
+            <tbody id="refBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-note">
+        <div class="note-box">
+          <strong>Aturan Penurunan Level:</strong><br>
+          Ketika gagal di level +9→+10, +19→+20, +29→+30, +39→+40, +49→+50:<br>
+          • 45% kemungkinan level turun 1<br>
+          • 55% level tetap<br><br>
+          <strong>Break Rate:</strong> Semua enhance bertanda "No Break" — item tidak bisa hancur.<br><br>
+          <strong>Bintang Tier:</strong><br>
+          +10 → Final Damage +1,400 (dari 1,300)<br>
+          +20 → Final Damage +1,500 · Elem 15%<br>
+          +30 → Final Damage +1,600 · Elem 20%<br>
+          +40 → Final Damage +1,700 · Elem 25%<br>
+          +50 → Final Damage +2,000 · Elem 30%
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA TABLE ──
+const DATA = [
+  // [from, successRate, gold, frag, root, atk, crit, finalDmg, hp, elem]
+  [0,  100, 50000, 20, 4, 2534000, 172300, 1300, 978500, 5],
+  [1,  100, 50000, 20, 4, 2635000, 177500, 1300, 1007900, 5],
+  [2,  100, 50000, 20, 4, 2740000, 182900, 1300, 1038200, 5],
+  [3,  100, 50000, 20, 4, 2850000, 188400, 1300, 1069400, 5],
+  [4,  100, 50000, 20, 4, 2964000, 194100, 1300, 1101500, 5],
+  [5,  100, 50000, 20, 4, 3083000, 200000, 1300, 1134600, 5],
+  [6,  100, 50000, 20, 4, 3206000, 206000, 1300, 1168700, 5],
+  [7,  100, 50000, 20, 4, 3334000, 212200, 1300, 1203800, 5],
+  [8,  100, 50000, 20, 4, 3467000, 218600, 1300, 1240000, 5],
+  [9,   15, 50000, 30, 5, 3606000, 240500, 1400, 1364000, 10],  // →+10
+  [10, 100, 70000, 35, 5, 3714000, 247800, 1400, 1405000, 10],
+  [11, 100, 70000, 35, 5, 3825000, 255300, 1400, 1447200, 10],
+  [12, 100, 70000, 35, 5, 3940000, 263000, 1400, 1490700, 10],
+  [13, 100, 70000, 35, 5, 4058000, 270900, 1400, 1535500, 10],
+  [14, 100, 70000, 35, 5, 4180000, 279100, 1400, 1581600, 10],
+  [15, 100, 70000, 35, 5, 4305000, 287500, 1400, 1629100, 10],
+  [16, 100, 70000, 35, 5, 4434000, 296200, 1400, 1678000, 10],
+  [17, 100, 70000, 35, 5, 4567000, 305100, 1400, 1728400, 10],
+  [18, 100, 70000, 35, 5, 4704000, 314300, 1400, 1780300, 10],
+  [19,  10, 70000, 40, 6, 4845000, 345800, 1500, 1958400, 15],  // →+20
+  [20, 100,100000, 45, 6, 4942000, 356200, 1500, 2017200, 15],
+  [21, 100,100000, 45, 6, 5041000, 366900, 1500, 2077800, 15],
+  [22, 100,100000, 45, 6, 5142000, 378000, 1500, 2140200, 15],
+  [23, 100,100000, 45, 6, 5245000, 389400, 1500, 2204500, 15],
+  [24, 100,100000, 45, 6, 5350000, 401100, 1500, 2270700, 15],
+  [25, 100,100000, 45, 6, 5457000, 413200, 1500, 2338900, 15],
+  [26, 100,100000, 45, 6, 5566000, 425600, 1500, 2409100, 15],
+  [27, 100,100000, 45, 6, 5677000, 438400, 1500, 2481400, 15],
+  [28, 100,100000, 45, 6, 5791000, 451600, 1500, 2555900, 15],
+  [29,   7,100000, 50, 7, 5907000, 496800, 1600, 2811500, 20],  // →+30
+  [30, 100,150000, 55, 7, 5966000, 511800, 1600, 2895900, 20],
+  [31, 100,150000, 55, 7, 6026000, 527200, 1600, 2982800, 20],
+  [32, 100,150000, 55, 7, 6086000, 543100, 1600, 3072300, 20],
+  [33, 100,150000, 55, 7, 6147000, 559400, 1600, 3164500, 20],
+  [34, 100,150000, 55, 7, 6208000, 576200, 1600, 3259500, 20],
+  [35, 100,150000, 55, 7, 6270000, 593500, 1600, 3357300, 20],
+  [36, 100,150000, 55, 7, 6333000, 611400, 1600, 3458100, 20],
+  [37, 100,150000, 55, 7, 6396000, 629800, 1600, 3561900, 20],
+  [38, 100,150000, 55, 7, 6460000, 648700, 1600, 3668800, 20],
+  [39,   5,150000, 60, 8, 6525000, 713600, 1700, 4035700, 25],  // →+40
+  [40, 100,200000, 65, 8, 6558000, 735100, 1700, 4156800, 25],
+  [41, 100,200000, 65, 8, 6591000, 757200, 1700, 4281600, 25],
+  [42, 100,200000, 65, 8, 6624000, 780000, 1700, 4410100, 25],
+  [43, 100,200000, 65, 8, 6657000, 803400, 1700, 4542500, 25],
+  [44, 100,200000, 65, 8, 6690000, 827600, 1700, 4678800, 25],
+  [45, 100,200000, 65, 8, 6723000, 852500, 1700, 4819200, 25],
+  [46, 100,200000, 65, 8, 6757000, 878100, 1700, 4963800, 25],
+  [47, 100,200000, 65, 8, 6791000, 904500, 1700, 5112800, 25],
+  [48, 100,200000, 65, 8, 6825000, 931700, 1700, 5266200, 25],
+  [49,   3,200000, 70,10, 7000000,1024900, 2000, 5792900, 30],  // →+50
+];
+
+// Stats for each level (index = level, so DATA[0] = stats after +1)
+// We also need +0 stats
+const STATS_BY_LEVEL = [
+  [2437000, 167200, 1300, 950000, 5],   // +0
+  [2534000, 172300, 1300, 978500, 5],   // +1
+  [2635000, 177500, 1300, 1007900, 5],
+  [2740000, 182900, 1300, 1038200, 5],
+  [2850000, 188400, 1300, 1069400, 5],
+  [2964000, 194100, 1300, 1101500, 5],
+  [3083000, 200000, 1300, 1134600, 5],
+  [3206000, 206000, 1300, 1168700, 5],
+  [3334000, 212200, 1300, 1203800, 5],
+  [3467000, 218600, 1300, 1240000, 5],
+  [3606000, 240500, 1400, 1364000, 10],
+  [3714000, 247800, 1400, 1405000, 10],
+  [3825000, 255300, 1400, 1447200, 10],
+  [3940000, 263000, 1400, 1490700, 10],
+  [4058000, 270900, 1400, 1535500, 10],
+  [4180000, 279100, 1400, 1581600, 10],
+  [4305000, 287500, 1400, 1629100, 10],
+  [4434000, 296200, 1400, 1678000, 10],
+  [4567000, 305100, 1400, 1728400, 10],
+  [4704000, 314300, 1400, 1780300, 10],
+  [4845000, 345800, 1500, 1958400, 15],
+  [4942000, 356200, 1500, 2017200, 15],
+  [5041000, 366900, 1500, 2077800, 15],
+  [5142000, 378000, 1500, 2140200, 15],
+  [5245000, 389400, 1500, 2204500, 15],
+  [5350000, 401100, 1500, 2270700, 15],
+  [5457000, 413200, 1500, 2338900, 15],
+  [5566000, 425600, 1500, 2409100, 15],
+  [5677000, 438400, 1500, 2481400, 15],
+  [5791000, 451600, 1500, 2555900, 15],
+  [5907000, 496800, 1600, 2811500, 20],
+  [5966000, 511800, 1600, 2895900, 20],
+  [6026000, 527200, 1600, 2982800, 20],
+  [6086000, 543100, 1600, 3072300, 20],
+  [6147000, 559400, 1600, 3164500, 20],
+  [6208000, 576200, 1600, 3259500, 20],
+  [6270000, 593500, 1600, 3357300, 20],
+  [6333000, 611400, 1600, 3458100, 20],
+  [6396000, 629800, 1600, 3561900, 20],
+  [6460000, 648700, 1600, 3668800, 20],
+  [6525000, 713600, 1700, 4035700, 25],
+  [6558000, 735100, 1700, 4156800, 25],
+  [6591000, 757200, 1700, 4281600, 25],
+  [6624000, 780000, 1700, 4410100, 25],
+  [6657000, 803400, 1700, 4542500, 25],
+  [6690000, 827600, 1700, 4678800, 25],
+  [6723000, 852500, 1700, 4819200, 25],
+  [6757000, 878100, 1700, 4963800, 25],
+  [6791000, 904500, 1700, 5112800, 25],
+  [6825000, 931700, 1700, 5266200, 25],
+  [7000000, 1024900, 2000, 5792900, 30],
+];
+
+// DROP levels (X→X+1 can drop on fail)
+const DROP_LEVELS = [9, 19, 29, 39, 49];
+const DROP_CHANCE = 0.45; // 45%
+
+// ── STATE ──
+let currentLevel = 0;
+let session = { attempt: 0, success: 0, fail: 0, down: 0, gold: 0, frag: 0, root: 0 };
+let autoRunning = false;
+let autoTimer = null;
+
+// ── INIT ──
+function init() {
+  // Populate from/to selects
+  const fromSel = document.getElementById('fromLevel');
+  const autoSel = document.getElementById('autoTarget');
+  for (let i = 0; i <= 49; i++) {
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = `+${i}`;
+    fromSel.appendChild(o);
+  }
+  for (let i = 1; i <= 50; i++) {
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = `+${i}`;
+    autoSel.appendChild(o);
+  }
+  autoSel.value = 50;
+
+  buildRefTable();
+  updateUI();
+}
+
+function buildRefTable() {
+  const tbody = document.getElementById('refBody');
+  for (let i = 0; i <= 49; i++) {
+    const d = DATA[i];
+    const tr = document.createElement('tr');
+    tr.id = `row-${i}`;
+    tr.innerHTML = `
+      <td>+${i}→${i+1}</td>
+      <td>${d[1]}%</td>
+      <td>${fmt(d[2])}</td>
+      <td>${d[3]}</td>
+      <td>${d[4]}</td>
+      <td>${fmt(d[5])}</td>
+      <td>${fmt(d[8])}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function updateUI() {
+  const lvl = currentLevel;
+  document.getElementById('lvlDisplay').textContent = `+${lvl}`;
+  document.getElementById('lvlTarget').textContent = lvl < 50 ? `+${lvl + 1}` : 'MAX';
+
+  // From level selector
+  document.getElementById('fromLevel').value = lvl;
+
+  // Disable enhance at max or when materials insufficient
+  const isMax = lvl >= 50;
+  const matsOk = isMax ? false : hasEnoughMats();
+  document.getElementById('btnEnhance').disabled = isMax || !matsOk;
+  document.getElementById('btnAuto').disabled = (isMax && !autoRunning) || (!isMax && !matsOk);
+
+  if (!isMax) {
+    const d = DATA[lvl];
+    document.getElementById('matGold').textContent = fmt(d[2]);
+    document.getElementById('matFrag').textContent = d[3];
+    document.getElementById('matRoot').textContent = d[4];
+
+    const isDrop = DROP_LEVELS.includes(lvl);
+    document.getElementById('successBadge').textContent = `✓ ${d[1]}%`;
+    document.getElementById('breakNote').textContent = isDrop
+      ? `⚠ Gagal: 45% chance turun ke +${lvl - 1}`
+      : (d[1] < 100 ? `Gagal: level tetap` : '');
+
+    // highlight ref table
+    document.querySelectorAll('.ref-table tr.highlight').forEach(r => r.classList.remove('highlight'));
+    const row = document.getElementById(`row-${lvl}`);
+    if (row) {
+      row.classList.add('highlight');
+      row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  } else {
+    document.getElementById('successBadge').textContent = '✓ MAX';
+    document.getElementById('breakNote').textContent = 'Level Maksimum Tercapai!';
+  }
+
+  // Stats
+  const s = STATS_BY_LEVEL[lvl];
+  document.getElementById('sAtk').textContent = fmt(s[0]);
+  document.getElementById('sCrit').textContent = fmt(s[1]);
+  document.getElementById('sFinal').textContent = fmt(s[2]);
+  document.getElementById('sHP').textContent = fmt(s[3]);
+  document.getElementById('sElem').textContent = s[4] + '%';
+
+  // Session stats
+  document.getElementById('statAttempt').textContent = session.attempt;
+  document.getElementById('statSuccess').textContent = session.success;
+  document.getElementById('statFail').textContent = session.fail;
+  document.getElementById('statDown').textContent = session.down;
+  document.getElementById('sumGold').textContent = fmtK(session.gold);
+  document.getElementById('sumFrag').textContent = session.frag;
+  document.getElementById('sumRoot').textContent = session.root;
+
+  checkInv();
+}
+
+function updateFromLevel() {
+  const lvl = parseInt(document.getElementById('fromLevel').value);
+  currentLevel = lvl;
+  updateUI();
+}
+
+// ── ENHANCE LOGIC ──
+function hasEnoughMats() {
+  // Returns true only if materials have been entered AND are sufficient
+  const lvl = currentLevel;
+  if (lvl >= 50) return false;
+  const d = DATA[lvl];
+  const gold = parseInt(document.getElementById('invGold').value) || 0;
+  const frag = parseInt(document.getElementById('invFrag').value) || 0;
+  const root = parseInt(document.getElementById('invRoot').value) || 0;
+  // If user hasn't input any inventory, block enhance
+  if (gold === 0 && frag === 0 && root === 0) return false;
+  return gold >= d[2] && frag >= d[3] && root >= d[4];
+}
+
+function doEnhance(silent = false) {
+  if (currentLevel >= 50) return 'max';
+  const lvl = currentLevel;
+  const d = DATA[lvl];
+  const rate = d[1];
+  const isDrop = DROP_LEVELS.includes(lvl);
+
+  // Check inventory before proceeding
+  const gold = parseInt(document.getElementById('invGold').value) || 0;
+  const frag = parseInt(document.getElementById('invFrag').value) || 0;
+  const root = parseInt(document.getElementById('invRoot').value) || 0;
+  const hasInv = gold > 0 || frag > 0 || root > 0;
+  if (hasInv && (gold < d[2] || frag < d[3] || root < d[4])) {
+    if (!silent) {
+      const msgEl = document.getElementById('resultMsg');
+      msgEl.className = 'result-msg fail';
+      msgEl.textContent = `⚠ Material tidak cukup untuk enhance ke +${lvl + 1}!`;
+    }
+    return 'nomats';
+  }
+
+  // Consume material
+  session.attempt++;
+  session.gold += d[2];
+  session.frag += d[3];
+  session.root += d[4];
+
+  // Deduct inventory
+  const ig = document.getElementById('invGold');
+  const iff = document.getElementById('invFrag');
+  const ir = document.getElementById('invRoot');
+  if (parseInt(ig.value) > 0) ig.value = Math.max(0, parseInt(ig.value) - d[2]);
+  if (parseInt(iff.value) > 0) iff.value = Math.max(0, parseInt(iff.value) - d[3]);
+  if (parseInt(ir.value) > 0) ir.value = Math.max(0, parseInt(ir.value) - d[4]);
+
+  const roll = Math.random() * 100;
+  let resultType, msg;
+
+  if (roll < rate) {
+    // SUCCESS
+    currentLevel++;
+    session.success++;
+    resultType = 'success';
+    msg = `✨ Sukses! +${lvl} → +${currentLevel}`;
+    if (!silent) spawnParticles(true);
+    addLog(`[+${lvl}→+${currentLevel}] SUKSES`, 's');
+  } else {
+    // FAIL
+    session.fail++;
+    if (isDrop) {
+      const dropRoll = Math.random();
+      if (dropRoll < DROP_CHANCE) {
+        // DROP
+        if (currentLevel > 0) currentLevel--;
+        session.down++;
+        resultType = 'down';
+        msg = `💔 Gagal & Turun! +${lvl} → +${currentLevel}`;
+        if (!silent) spawnParticles(false);
+        addLog(`[+${lvl}→TURUN→+${currentLevel}] GAGAL+TURUN`, 'd');
+      } else {
+        resultType = 'fail';
+        msg = `❌ Gagal! Level tetap +${lvl}`;
+        addLog(`[+${lvl}] GAGAL (level tetap)`, 'f');
+      }
+    } else {
+      resultType = 'fail';
+      msg = `❌ Gagal! Level tetap +${lvl}`;
+      addLog(`[+${lvl}] GAGAL`, 'f');
+    }
+  }
+
+  if (!silent) {
+    const msgEl = document.getElementById('resultMsg');
+    msgEl.className = `result-msg ${resultType}`;
+    msgEl.textContent = msg;
+
+    const lvlEl = document.getElementById('lvlDisplay');
+    lvlEl.classList.remove('flash-success', 'flash-fail');
+    void lvlEl.offsetWidth;
+    lvlEl.classList.add(resultType === 'success' ? 'flash-success' : 'flash-fail');
+  }
+
+  updateUI();
+  return resultType === 'success';
+}
+
+// ── AUTO ENHANCE ──
+function toggleAuto() {
+  if (autoRunning) {
+    stopAuto();
+  } else {
+    startAuto();
+  }
+}
+
+function startAuto() {
+  const target = parseInt(document.getElementById('autoTarget').value);
+  if (currentLevel >= target) {
+    alert(`Level sudah +${currentLevel}, pilih target lebih tinggi.`);
+    return;
+  }
+  autoRunning = true;
+  document.getElementById('btnAuto').textContent = '⏹ Stop Auto';
+  document.getElementById('btnEnhance').disabled = true;
+  runAutoStep(target);
+}
+
+function runAutoStep(target) {
+  if (!autoRunning || currentLevel >= target) {
+    stopAuto();
+    return;
+  }
+
+  // Check material before attempting
+  if (!hasEnoughMats()) {
+    stopAuto('nomats');
+    return;
+  }
+
+  const speed = parseInt(document.getElementById('autoSpeed').value);
+  const result = doEnhance(speed <= 100);
+
+  if (result === 'nomats') {
+    stopAuto('nomats');
+    return;
+  }
+
+  const prog = (currentLevel / target) * 100;
+  document.getElementById('progressBar').style.width = Math.min(prog, 100) + '%';
+  document.getElementById('autoStatusLabel').textContent =
+    `+${currentLevel} / +${target} · ${session.attempt} attempts`;
+
+  autoTimer = setTimeout(() => runAutoStep(target), speed);
+}
+
+function stopAuto(reason = '') {
+  autoRunning = false;
+  clearTimeout(autoTimer);
+  document.getElementById('btnAuto').textContent = '▶ Start Auto';
+  document.getElementById('btnEnhance').disabled = currentLevel >= 50 || !hasEnoughMats();
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('autoStatusLabel').textContent = '';
+  const target = parseInt(document.getElementById('autoTarget').value);
+  const msgEl = document.getElementById('resultMsg');
+  if (reason === 'nomats') {
+    msgEl.className = 'result-msg fail';
+    msgEl.textContent = `⚠ Auto berhenti! Material/Gold habis di level +${currentLevel}`;
+    addLog(`AUTO BERHENTI — material habis di +${currentLevel}`, 'f');
+  } else if (currentLevel >= target) {
+    msgEl.className = 'result-msg success';
+    msgEl.textContent = `🎉 Auto selesai! Mencapai +${currentLevel}`;
+  }
+}
+
+function resetAll() {
+  if (autoRunning) stopAuto();
+  currentLevel = 0;
+  session = { attempt: 0, success: 0, fail: 0, down: 0, gold: 0, frag: 0, root: 0 };
+  document.getElementById('resultMsg').className = 'result-msg idle';
+  document.getElementById('resultMsg').textContent = '⚔ Siap untuk enhance...';
+  document.getElementById('logBox').innerHTML = '<div class="log-entry">— Reset. Simulator siap. —</div>';
+  updateUI();
+}
+
+// ── LOG ──
+function addLog(text, type = '') {
+  const box = document.getElementById('logBox');
+  const el = document.createElement('div');
+  el.className = 'log-entry ' + type;
+  const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  el.textContent = `[${time}] ${text}`;
+  box.appendChild(el);
+  box.scrollTop = box.scrollHeight;
+  // keep max 200 entries
+  while (box.children.length > 200) box.removeChild(box.firstChild);
+}
+
+// ── INVENTORY CHECK ──
+function checkInv() {
+  const lvl = currentLevel;
+  if (lvl >= 50) {
+    document.getElementById('invStatus').className = 'inv-status';
+    document.getElementById('invStatus').textContent = 'Level maksimum!';
+    return;
+  }
+  const d = DATA[lvl];
+  const gold = parseInt(document.getElementById('invGold').value) || 0;
+  const frag = parseInt(document.getElementById('invFrag').value) || 0;
+  const root = parseInt(document.getElementById('invRoot').value) || 0;
+
+  const canG = gold >= d[2];
+  const canF = frag >= d[3];
+  const canR = root >= d[4];
+
+  const el = document.getElementById('invStatus');
+  if (gold === 0 && frag === 0 && root === 0) {
+    el.className = 'inv-status low';
+    el.textContent = '⚠ Masukkan jumlah material terlebih dahulu untuk enhance';
+    refreshEnhanceBtn();
+    return;
+  }
+
+  if (canG && canF && canR) {
+    el.className = 'inv-status ok';
+    el.textContent = `✓ Material cukup untuk enhance ke +${lvl + 1}`;
+  } else {
+    const missing = [];
+    if (!canG) missing.push(`Gold: butuh ${fmt(d[2])}, punya ${fmt(gold)}`);
+    if (!canF) missing.push(`Fragment: butuh ${d[3]}, punya ${frag}`);
+    if (!canR) missing.push(`Root: butuh ${d[4]}, punya ${root}`);
+    el.className = 'inv-status low';
+    el.textContent = `⚠ Kurang: ${missing.join(' · ')}`;
+  }
+  refreshEnhanceBtn();
+}
+
+function refreshEnhanceBtn() {
+  const lvl = currentLevel;
+  const isMax = lvl >= 50;
+  const matsOk = isMax ? false : hasEnoughMats();
+  if (!autoRunning) {
+    document.getElementById('btnEnhance').disabled = isMax || !matsOk;
+    document.getElementById('btnAuto').disabled = isMax || !matsOk;
+  }
+}
+
+// ── PARTICLES ──
+function spawnParticles(success) {
+  const container = document.getElementById('particles');
+  const colors = success
+    ? ['#56D68A', '#C9A227', '#fff', '#2E7D52']
+    : ['#E74C3C', '#8B0000', '#C0392B'];
+
+  const btn = document.getElementById('btnEnhance');
+  const rect = btn.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top;
+
+  for (let i = 0; i < (success ? 18 : 8); i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 8 + 4;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      left:${cx + (Math.random()-0.5)*120}px;
+      top:${cy}px;
+      animation-duration:${0.8 + Math.random()*0.6}s;
+      animation-delay:${Math.random()*0.2}s;
+      box-shadow: 0 0 6px currentColor;
+    `;
+    container.appendChild(p);
+    setTimeout(() => p.remove(), 1500);
+  }
+}
+
+// ── TABS ──
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['tbl','note'][i] === id);
+  });
+  document.getElementById('tab-tbl').classList.toggle('active', id === 'tbl');
+  document.getElementById('tab-note').classList.toggle('active', id === 'note');
+}
+
+// ── UTILS ──
+function fmt(n) {
+  return n.toLocaleString('id-ID');
+}
+
+function fmtK(n) {
+  if (n >= 1000000000) return (n/1000000000).toFixed(1) + 'B';
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(0) + 'K';
+  return n.toString();
+}
+
+init();
+</script>
+</body>
+</html>
